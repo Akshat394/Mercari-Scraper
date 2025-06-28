@@ -12,7 +12,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.8,
         "category": "Electronics",
         "brand": "Apple",
-        "image_url": "https://via.placeholder.com/150x150?text=iPhone+14+Pro",
+        "image_url": "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m001",
         "description": "iPhone 14 Pro Max in excellent condition. Minor wear on corners."
     },
@@ -24,7 +24,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.9,
         "category": "Gaming",
         "brand": "Nintendo",
-        "image_url": "https://via.placeholder.com/150x150?text=Nintendo+Switch",
+        "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m002",
         "description": "Nintendo Switch OLED model in pristine condition with original box."
     },
@@ -36,7 +36,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.7,
         "category": "Electronics",
         "brand": "Apple",
-        "image_url": "https://via.placeholder.com/150x150?text=MacBook+Air",
+        "image_url": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m003",
         "description": "MacBook Air M2 in good working condition. Some scratches on lid."
     },
@@ -48,7 +48,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.6,
         "category": "Trading Cards",
         "brand": "Pokemon",
-        "image_url": "https://via.placeholder.com/150x150?text=Pikachu+Card",
+        "image_url": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m004",
         "description": "PSA 10 graded Pikachu promotional card in perfect condition."
     },
@@ -60,7 +60,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.8,
         "category": "Electronics",
         "brand": "Apple",
-        "image_url": "https://via.placeholder.com/150x150?text=AirPods+Pro",
+        "image_url": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m005",
         "description": "AirPods Pro 2nd generation with original charging case and accessories."
     },
@@ -72,7 +72,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.5,
         "category": "Fashion",
         "brand": "Louis Vuitton",
-        "image_url": "https://via.placeholder.com/150x150?text=LV+Speedy",
+        "image_url": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m006",
         "description": "Authentic Louis Vuitton Monogram Speedy 30 handbag."
     },
@@ -84,7 +84,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.9,
         "category": "Gaming",
         "brand": "Sony",
-        "image_url": "https://via.placeholder.com/150x150?text=PlayStation+5",
+        "image_url": "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m007",
         "description": "PlayStation 5 console in excellent condition with all original accessories."
     },
@@ -96,7 +96,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.7,
         "category": "Watches",
         "brand": "Rolex",
-        "image_url": "https://via.placeholder.com/150x150?text=Rolex+Sub",
+        "image_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m008",
         "description": "Rolex Submariner Date with box and papers. Serviced recently."
     },
@@ -108,7 +108,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.8,
         "category": "Electronics",
         "brand": "Apple",
-        "image_url": "https://via.placeholder.com/150x150?text=iPad+Pro",
+        "image_url": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m009",
         "description": "iPad Pro 12.9-inch 6th generation in like-new condition with screen protector."
     },
@@ -120,7 +120,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.6,
         "category": "Trading Cards",
         "brand": "Takara Tomy",
-        "image_url": "https://via.placeholder.com/150x150?text=Duel+Masters",
+        "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m010",
         "description": "Duel Masters Black Lotus promotional card in good condition."
     },
@@ -132,7 +132,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.4,
         "category": "Fashion",
         "brand": "Champion",
-        "image_url": "https://via.placeholder.com/150x150?text=Champion+Hoodie",
+        "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m011",
         "description": "Vintage Champion Reverse Weave hoodie made in USA."
     },
@@ -144,7 +144,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.9,
         "category": "Electronics",
         "brand": "Canon",
-        "image_url": "https://via.placeholder.com/150x150?text=Canon+R6",
+        "image_url": "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m012",
         "description": "Canon EOS R6 Mark II camera body in excellent condition with low shutter count."
     },
@@ -156,7 +156,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.6,
         "category": "Fashion",
         "brand": "Fendi",
-        "image_url": "https://via.placeholder.com/150x150?text=Fendi+Baguette",
+        "image_url": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m013",
         "description": "Authentic Fendi Baguette bag in Zucca canvas pattern."
     },
@@ -168,7 +168,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.7,
         "category": "Collectibles",
         "brand": "Megahouse",
-        "image_url": "https://via.placeholder.com/150x150?text=Luffy+Figure",
+        "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m014",
         "description": "One Piece Luffy Gear 5 figure by Megahouse, brand new in box."
     },
@@ -180,7 +180,7 @@ SAMPLE_MERCARI_DATA = [
         "seller_rating": 4.5,
         "category": "Fashion",
         "brand": "Supreme",
-        "image_url": "https://via.placeholder.com/150x150?text=Supreme+Hoodie",
+        "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m015",
         "description": "Supreme Box Logo hoodie in grey, size L, authentic with tags."
     }
