@@ -1,0 +1,25 @@
+# Core AI and LLM dependencies
+openai>=1.93.0
+
+# Web scraping and automation
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+lxml>=4.9.0
+fake-useragent>=1.4.0
+
+# Database and data handling
+psycopg2-binary>=2.9.10
+sqlalchemy>=2.0.41
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Web framework and UI
+streamlit>=1.46.1
+
+# Content extraction
+trafilatura>=2.0.0
+
+# Utilities
+python-dotenv>=1.0.0 
