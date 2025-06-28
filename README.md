@@ -2,6 +2,10 @@
 
 A comprehensive shopping assistant that implements real web scraping, intelligent product recommendations, and automated search capabilities for Mercari Japan.
 
+## 🌐 **Live Demo**
+
+**🚀 Try the application live:** [https://mercari-scraper.streamlit.app/](https://mercari-scraper.streamlit.app/)
+
 ## 🎯 **Project Overview**
 
 This project fully implements the Mercari Japan Shopping Assistant requirements:
@@ -160,6 +164,9 @@ pytest tests/test_database.py
 
 ## 🚀 **Deployment**
 
+### **Live Application**
+**🌐 Streamlit Cloud:** [https://mercari-scraper.streamlit.app/](https://mercari-scraper.streamlit.app/)
+
 ### **Local Development**
 ```bash
 streamlit run app.py --server.port 5000
@@ -167,6 +174,12 @@ streamlit run app.py --server.port 5000
 
 ### **Production Deployment**
 ```bash
+# Deploy to Streamlit Cloud
+# 1. Push to GitHub
+# 2. Connect repository at share.streamlit.io
+# 3. Set environment variables
+# 4. Deploy!
+
 # Deploy to Heroku
 git push heroku main
 
