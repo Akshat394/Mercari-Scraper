@@ -102,6 +102,8 @@ A bilingual AI-powered shopping assistant application that helps users find prod
 ## Changelog
 - June 28, 2025: Initial setup with Streamlit UI and OpenAI integration
 - June 28, 2025: Added PostgreSQL database with SQLAlchemy ORM for persistent product storage
+- June 28, 2025: Enhanced UI with product showcase section, improved styling, and fixed contrast issues
+- June 28, 2025: Finalized design with proper accessibility and visual hierarchy
 
 ## User Preferences
 

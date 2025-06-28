@@ -15,11 +15,27 @@ st.set_page_config(
     layout="wide"
 )
 
-# Clean, modern CSS
+# Clean, modern CSS with proper contrast
 st.markdown("""
 <style>
     .main {
         padding: 2rem;
+        background-color: #fafafa;
+    }
+    
+    /* Main title styling */
+    h1 {
+        color: #1f2937 !important;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    /* Subtitle styling */
+    .main > div > div > div > div > p {
+        color: #4b5563 !important;
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
     }
     
     .product-card {
@@ -28,13 +44,18 @@ st.markdown("""
         padding: 1.5rem;
         margin: 1rem 0;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        border: 1px solid #e0e0e0;
+        border: 1px solid #e5e7eb;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     
     .product-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .product-card h3 {
+        color: #1f2937 !important;
+        margin-bottom: 1rem;
     }
     
     .product-image {
@@ -44,14 +65,14 @@ st.markdown("""
     }
     
     .price-tag {
-        color: #ff4444;
+        color: #dc2626;
         font-size: 1.3rem;
         font-weight: bold;
         margin: 0.5rem 0;
     }
     
     .category-badge {
-        background: linear-gradient(45deg, #667eea, #764ba2);
+        background: #4f46e5;
         color: white;
         padding: 0.3rem 1rem;
         border-radius: 20px;
@@ -63,33 +84,83 @@ st.markdown("""
     
     .section-title {
         text-align: center;
-        color: #333;
+        color: #1f2937 !important;
         margin: 2rem 0 1rem 0;
         font-size: 2rem;
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+        text-shadow: none;
     }
     
     .star-rating {
-        color: #ffd700;
+        color: #f59e0b;
         font-size: 1.1rem;
     }
     
+    /* Tab styling for better contrast */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 24px;
+        gap: 8px;
+        background-color: white;
+        padding: 0.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
     .stTabs [data-baseweb="tab"] {
-        padding: 10px 20px;
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        border: 1px solid #e9ecef;
+        padding: 12px 24px;
+        background-color: #f3f4f6;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        color: #374151 !important;
+        font-weight: 500;
     }
     
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
+        background: #4f46e5 !important;
+        color: white !important;
+        border-color: #4f46e5;
+    }
+    
+    /* Chat message styling */
+    .stChatMessage {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+    
+    /* Product text content contrast */
+    .product-card p, .product-card div {
+        color: #374151 !important;
+    }
+    
+    /* Improve markdown text visibility */
+    .markdown-text-container {
+        color: #1f2937 !important;
+    }
+    
+    /* Chat input styling */
+    .stChatInput > div > div > textarea {
+        border: 2px solid #d1d5db !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Divider styling */
+    hr {
+        border-color: #e5e7eb !important;
+        margin: 2rem 0;
+    }
+    
+    /* Info box styling */
+    .stAlert {
+        background-color: #eff6ff !important;
+        border: 1px solid #bfdbfe !important;
+        color: #1e40af !important;
+    }
+    
+    /* Spinner text */
+    .stSpinner > div {
+        color: #1f2937 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -124,8 +195,10 @@ def display_product_card(product: Dict, index: Optional[int] = None):
         st.markdown(f'<div class="price-tag">¥{product["price"]:,}</div>', unsafe_allow_html=True)
         
         st.markdown(f"""
-        **Condition:** {product['condition'].title()}  
-        **Seller Rating:** <span class="star-rating">{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)
+        <div style="color: #374151; line-height: 1.6;">
+        <strong>Condition:</strong> {product['condition'].title()}<br>
+        <strong>Seller Rating:</strong> <span class="star-rating">{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)
+        </div>
         """, unsafe_allow_html=True)
         
         if product.get('url'):
@@ -174,11 +247,11 @@ def display_showcase_grid(products: List[Dict]):
             if product.get("image_url"):
                 st.image(product["image_url"], use_container_width=True)
             
-            st.markdown(f"**{product['name'][:40]}{'...' if len(product['name']) > 40 else ''}**")
+            st.markdown(f"<h4 style='color: #1f2937; margin: 0.5rem 0;'>{product['name'][:40]}{'...' if len(product['name']) > 40 else ''}</h4>", unsafe_allow_html=True)
             st.markdown(f'<div class="category-badge">{product["category"]}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="price-tag">¥{product["price"]:,}</div>', unsafe_allow_html=True)
-            st.markdown(f"**Rating:** <span class='star-rating'>{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)", unsafe_allow_html=True)
-            st.markdown(f"**Condition:** {product['condition'].title()}")
+            st.markdown(f"<div style='color: #374151;'><strong>Rating:</strong> <span class='star-rating'>{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='color: #374151;'><strong>Condition:</strong> {product['condition'].title()}</div>", unsafe_allow_html=True)
             
             st.markdown('</div>', unsafe_allow_html=True)
 
