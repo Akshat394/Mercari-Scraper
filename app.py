@@ -15,46 +15,49 @@ st.set_page_config(
     layout="wide"
 )
 
-# Clean, modern CSS with proper contrast
+# Dark blue theme CSS with excellent contrast
 st.markdown("""
 <style>
     .main {
         padding: 2rem;
-        background-color: #fafafa;
+        background-color: #0f172a;
+        color: #f1f5f9;
     }
     
     /* Main title styling */
     h1 {
-        color: #1f2937 !important;
+        color: #f1f5f9 !important;
         text-align: center;
         margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     
     /* Subtitle styling */
     .main > div > div > div > div > p {
-        color: #4b5563 !important;
+        color: #cbd5e1 !important;
         text-align: center;
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
     
     .product-card {
-        background: white;
+        background: #1e293b;
         border-radius: 12px;
         padding: 1.5rem;
         margin: 1rem 0;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        border: 1px solid #334155;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     
     .product-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        box-shadow: 0 8px 25px rgba(96, 165, 250, 0.2);
+        border-color: #60a5fa;
     }
     
     .product-card h3 {
-        color: #1f2937 !important;
+        color: #f1f5f9 !important;
         margin-bottom: 1rem;
     }
     
@@ -65,14 +68,15 @@ st.markdown("""
     }
     
     .price-tag {
-        color: #dc2626;
+        color: #fbbf24;
         font-size: 1.3rem;
         font-weight: bold;
         margin: 0.5rem 0;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     
     .category-badge {
-        background: #4f46e5;
+        background: linear-gradient(45deg, #3b82f6, #1d4ed8);
         color: white;
         padding: 0.3rem 1rem;
         border-radius: 20px;
@@ -80,87 +84,140 @@ st.markdown("""
         display: inline-block;
         margin: 0.3rem 0;
         font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     
     .section-title {
         text-align: center;
-        color: #1f2937 !important;
+        color: #f1f5f9 !important;
         margin: 2rem 0 1rem 0;
         font-size: 2rem;
         font-weight: bold;
-        text-shadow: none;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     
     .star-rating {
-        color: #f59e0b;
+        color: #fbbf24;
         font-size: 1.1rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
     
-    /* Tab styling for better contrast */
+    /* Tab styling for dark theme */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        background-color: white;
+        background-color: #1e293b;
         padding: 0.5rem;
         border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        border: 1px solid #334155;
     }
     
     .stTabs [data-baseweb="tab"] {
         padding: 12px 24px;
-        background-color: #f3f4f6;
+        background-color: #334155;
         border-radius: 8px;
-        border: 1px solid #d1d5db;
-        color: #374151 !important;
+        border: 1px solid #475569;
+        color: #cbd5e1 !important;
         font-weight: 500;
     }
     
     .stTabs [aria-selected="true"] {
-        background: #4f46e5 !important;
+        background: linear-gradient(45deg, #3b82f6, #1d4ed8) !important;
         color: white !important;
-        border-color: #4f46e5;
+        border-color: #3b82f6;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
     }
     
     /* Chat message styling */
     .stChatMessage {
-        background: white;
-        border: 1px solid #e5e7eb;
+        background: #1e293b;
+        border: 1px solid #334155;
         border-radius: 10px;
         padding: 1rem;
         margin: 0.5rem 0;
+        color: #f1f5f9;
     }
     
     /* Product text content contrast */
     .product-card p, .product-card div {
-        color: #374151 !important;
+        color: #cbd5e1 !important;
     }
     
     /* Improve markdown text visibility */
     .markdown-text-container {
-        color: #1f2937 !important;
+        color: #f1f5f9 !important;
     }
     
     /* Chat input styling */
     .stChatInput > div > div > textarea {
-        border: 2px solid #d1d5db !important;
+        background-color: #1e293b !important;
+        border: 2px solid #334155 !important;
         border-radius: 10px !important;
+        color: #f1f5f9 !important;
+    }
+    
+    .stChatInput > div > div > textarea:focus {
+        border-color: #60a5fa !important;
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
     }
     
     /* Divider styling */
     hr {
-        border-color: #e5e7eb !important;
+        border-color: #334155 !important;
         margin: 2rem 0;
     }
     
     /* Info box styling */
     .stAlert {
-        background-color: #eff6ff !important;
-        border: 1px solid #bfdbfe !important;
-        color: #1e40af !important;
+        background-color: #1e3a8a !important;
+        border: 1px solid #3b82f6 !important;
+        color: #bfdbfe !important;
     }
     
     /* Spinner text */
     .stSpinner > div {
-        color: #1f2937 !important;
+        color: #f1f5f9 !important;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: #1e293b;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+    }
+    
+    .stButton > button:hover {
+        background-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* Ensure all text is visible */
+    p, div, span, label {
+        color: #cbd5e1 !important;
+    }
+    
+    /* Header text */
+    h2, h3, h4, h5, h6 {
+        color: #f1f5f9 !important;
+    }
+    
+    /* Link styling */
+    a {
+        color: #60a5fa !important;
+        text-decoration: none;
+    }
+    
+    a:hover {
+        color: #93c5fd !important;
+        text-decoration: underline;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -195,7 +252,7 @@ def display_product_card(product: Dict, index: Optional[int] = None):
         st.markdown(f'<div class="price-tag">¥{product["price"]:,}</div>', unsafe_allow_html=True)
         
         st.markdown(f"""
-        <div style="color: #374151; line-height: 1.6;">
+        <div style="color: #cbd5e1; line-height: 1.6;">
         <strong>Condition:</strong> {product['condition'].title()}<br>
         <strong>Seller Rating:</strong> <span class="star-rating">{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)
         </div>
@@ -247,11 +304,11 @@ def display_showcase_grid(products: List[Dict]):
             if product.get("image_url"):
                 st.image(product["image_url"], use_container_width=True)
             
-            st.markdown(f"<h4 style='color: #1f2937; margin: 0.5rem 0;'>{product['name'][:40]}{'...' if len(product['name']) > 40 else ''}</h4>", unsafe_allow_html=True)
+            st.markdown(f"<h4 style='color: #f1f5f9; margin: 0.5rem 0;'>{product['name'][:40]}{'...' if len(product['name']) > 40 else ''}</h4>", unsafe_allow_html=True)
             st.markdown(f'<div class="category-badge">{product["category"]}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="price-tag">¥{product["price"]:,}</div>', unsafe_allow_html=True)
-            st.markdown(f"<div style='color: #374151;'><strong>Rating:</strong> <span class='star-rating'>{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)</div>", unsafe_allow_html=True)
-            st.markdown(f"<div style='color: #374151;'><strong>Condition:</strong> {product['condition'].title()}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='color: #cbd5e1;'><strong>Rating:</strong> <span class='star-rating'>{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='color: #cbd5e1;'><strong>Condition:</strong> {product['condition'].title()}</div>", unsafe_allow_html=True)
             
             st.markdown('</div>', unsafe_allow_html=True)
 
