@@ -183,5 +183,113 @@ SAMPLE_MERCARI_DATA = [
         "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=150&h=150&fit=crop&crop=center",
         "url": "https://jp.mercari.com/item/m015",
         "description": "Supreme Box Logo hoodie in grey, size L, authentic with tags."
+    },
+    {
+        "id": "m016",
+        "name": "CHANEL ココマーク イヤリング ゴールド",
+        "price": 65000,
+        "condition": "very_good",
+        "seller_rating": 4.8,
+        "category": "Fashion",
+        "brand": "Chanel",
+        "image_url": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m016",
+        "description": "Authentic Chanel Coco mark earrings in gold, excellent condition."
+    },
+    {
+        "id": "m017",
+        "name": "遊戯王 ブルーアイズホワイトドラゴン 初期",
+        "price": 35000,
+        "condition": "good",
+        "seller_rating": 4.7,
+        "category": "Trading Cards",
+        "brand": "Konami",
+        "image_url": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m017",
+        "description": "Yu-Gi-Oh Blue-Eyes White Dragon first edition card in good condition."
+    },
+    {
+        "id": "m018",
+        "name": "ドラゴンボール フィギュア 超サイヤ人悟空",
+        "price": 12000,
+        "condition": "new",
+        "seller_rating": 4.9,
+        "category": "Collectibles",
+        "brand": "Bandai",
+        "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m018",
+        "description": "Dragon Ball Super Saiyan Goku figure by Bandai, brand new in box."
+    },
+    {
+        "id": "m019",
+        "name": "iPhone 15 Pro 128GB ナチュラルチタニウム",
+        "price": 165000,
+        "condition": "like_new",
+        "seller_rating": 4.9,
+        "category": "Electronics",
+        "brand": "Apple",
+        "image_url": "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m019",
+        "description": "iPhone 15 Pro 128GB in Natural Titanium, like new condition with box."
+    },
+    {
+        "id": "m020",
+        "name": "Nike Air Jordan 1 Retro High OG シカゴ",
+        "price": 48000,
+        "condition": "very_good",
+        "seller_rating": 4.6,
+        "category": "Fashion",
+        "brand": "Nike",
+        "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m020",
+        "description": "Nike Air Jordan 1 Retro High OG Chicago colorway in very good condition."
+    },
+    {
+        "id": "m021",
+        "name": "Sony WH-1000XM5 ワイヤレスヘッドホン",
+        "price": 32000,
+        "condition": "like_new",
+        "seller_rating": 4.8,
+        "category": "Electronics",
+        "brand": "Sony",
+        "image_url": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m021",
+        "description": "Sony WH-1000XM5 wireless noise-canceling headphones, like new."
+    },
+    {
+        "id": "m022",
+        "name": "任天堂 ゲームボーイ ポケットモンスター 赤",
+        "price": 8500,
+        "condition": "good",
+        "seller_rating": 4.5,
+        "category": "Gaming",
+        "brand": "Nintendo",
+        "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m022",
+        "description": "Nintendo Game Boy Pokémon Red version in good working condition."
+    },
+    {
+        "id": "m023",
+        "name": "グッチ GGマーモント レザーベルト",
+        "price": 42000,
+        "condition": "very_good",
+        "seller_rating": 4.7,
+        "category": "Fashion",
+        "brand": "Gucci",
+        "image_url": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m023",
+        "description": "Authentic Gucci GG Marmont leather belt in very good condition."
+    },
+    {
+        "id": "m024",
+        "name": "ダイソン V15 Detect コードレス掃除機",
+        "price": 68000,
+        "condition": "like_new",
+        "seller_rating": 4.9,
+        "category": "Home & Kitchen",
+        "brand": "Dyson",
+        "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=150&h=150&fit=crop&crop=center",
+        "url": "https://jp.mercari.com/item/m024",
+        "description": "Dyson V15 Detect cordless vacuum cleaner in like new condition."
     }
 ]
