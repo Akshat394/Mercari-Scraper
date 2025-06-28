@@ -19,9 +19,10 @@ A bilingual AI-powered shopping assistant application that helps users find prod
 - **Caching**: Streamlit resource caching for service initialization
 
 ### Data Storage Solutions
-- **Development Data**: Static sample data stored in `core/sample_data.py`
-- **Data Structure**: JSON-like dictionaries representing Mercari products
-- **Future**: Designed to be replaced with actual web scraping or API integration
+- **Database**: PostgreSQL database with SQLAlchemy ORM
+- **Schema**: Products table with fields for id, name, price, condition, seller_rating, category, brand, image_url, url, description
+- **Data Management**: DatabaseManager class handles all database operations
+- **Initialization**: Automatically populated with sample product data on first run
 
 ## Key Components
 
@@ -33,9 +34,9 @@ A bilingual AI-powered shopping assistant application that helps users find prod
    - Function calling capabilities for structured output
 
 2. **DataHandler** (`core/data_handler.py`)
-   - Product search and filtering logic
-   - Sample data management (placeholder for actual scraping)
-   - Criteria matching algorithms
+   - Database integration layer for product operations
+   - Product search and retrieval from PostgreSQL
+   - Interface between application logic and database
 
 3. **ProductRanker** (`core/product_ranker.py`)
    - Multi-criteria scoring system
@@ -58,7 +59,7 @@ A bilingual AI-powered shopping assistant application that helps users find prod
 2. **Language Detection**: System identifies input language using character analysis
 3. **Query Parsing**: LLM extracts structured filters and search parameters from natural language
 4. **Translation**: English queries translated to Japanese for effective Mercari searching
-5. **Product Search**: Data handler filters sample products based on extracted criteria
+5. **Product Search**: Data handler queries PostgreSQL database for matching products
 6. **Ranking**: Products scored and ranked using weighted multi-criteria algorithm
 7. **AI Recommendation**: Top products sent to LLM for personalized recommendation generation
 8. **Display**: Results presented in chat interface with formatted product information
@@ -72,11 +73,13 @@ A bilingual AI-powered shopping assistant application that helps users find prod
 ### Python Libraries
 - **Streamlit**: Web application framework
 - **OpenAI**: Official OpenAI Python client
+- **SQLAlchemy**: ORM for database operations
+- **psycopg2-binary**: PostgreSQL database adapter
 - **Standard Libraries**: json, os, re, typing, math
 
-### Future Dependencies
-- **Web Scraping**: requests, BeautifulSoup4 (for actual Mercari integration)
-- **Database**: Potential integration for product data persistence
+### Database
+- **PostgreSQL**: Primary data storage for product information
+- **Environment Variables**: DATABASE_URL, PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
 
 ## Deployment Strategy
 
@@ -97,7 +100,8 @@ A bilingual AI-powered shopping assistant application that helps users find prod
 - Caching layer ready for production optimization
 
 ## Changelog
-- June 28, 2025. Initial setup
+- June 28, 2025: Initial setup with Streamlit UI and OpenAI integration
+- June 28, 2025: Added PostgreSQL database with SQLAlchemy ORM for persistent product storage
 
 ## User Preferences
 
