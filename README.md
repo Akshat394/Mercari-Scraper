@@ -1,62 +1,224 @@
 # Mercari Japan Shopping Assistant
 
-A bilingual AI-powered shopping assistant for Mercari Japan built with Streamlit and OpenAI GPT-4o.
+A bilingual AI-powered shopping assistant that helps users find products on Mercari Japan with natural language queries in English or Japanese.
 
 ## Features
 
-- **Bilingual Support**: Accept queries in English or Japanese
-- **Smart Query Parsing**: Uses LLM to extract product filters and search parameters
-- **Translation**: Automatically translates English queries to Japanese for effective Mercari searches
-- **Product Ranking**: Intelligent ranking based on relevance, price, condition, and seller rating
-- **AI Recommendations**: GPT-4o generates personalized product recommendations with explanations
-- **Chat Interface**: Interactive chat-like interface with message history
-- **Real-time Processing**: Progress indicators and responsive UI
+- 🤖 AI-powered product search and recommendations using OpenAI GPT-4o
+- 🌐 Bilingual support (English/Japanese) with automatic language detection
+- 🛍️ Product showcase with categorized browsing
+- 💾 PostgreSQL database with 24+ sample products
+- 🎨 Beautiful dark blue theme with excellent contrast
+- 📱 Responsive chat interface built with Streamlit
 
-## Setup
+## Prerequisites
 
-### Prerequisites
-
-- Python 3.8+
+- Python 3.11+
+- PostgreSQL database
 - OpenAI API key
 
-### Installation
+## Local Development Setup (Cursor)
 
-1. Clone or download the project files
+### 1. Clone and Setup
 
-2. Set up your OpenAI API key as an environment variable:
-   ```bash
-   export OPENAI_API_KEY="your-api-key-here"
-   ```
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd mercari-shopping-assistant
 
-3. Run the application:
-   ```bash
-   streamlit run app.py --server.port 5000
-   ```
+# Install Python dependencies
+pip install -r requirements.txt
+# or if using uv:
+uv sync
+```
 
-4. Open your browser and navigate to `http://localhost:5000`
+### 2. Environment Variables
 
-## Usage
+Create a `.env` file in the root directory:
 
-1. Type your product query in English or Japanese in the chat input
-2. The assistant will:
-   - Parse your query to extract product criteria
-   - Translate to Japanese if needed for Mercari search
-   - Find matching products from the database
-   - Rank products based on multiple factors
-   - Generate personalized recommendations
-3. View the top 3 product recommendations with detailed explanations
+```env
+# OpenAI API Key (required)
+OPENAI_API_KEY=your_openai_api_key_here
 
-### Example Queries
+# PostgreSQL Database (required)
+DATABASE_URL=postgresql://username:password@localhost:5432/mercari_db
+PGHOST=localhost
+PGPORT=5432
+PGUSER=your_username
+PGPASSWORD=your_password
+PGDATABASE=mercari_db
+```
 
-**English:**
-- "I'm looking for a gaming laptop under $1500"
-- "Show me vintage Champion hoodies in good condition"
-- "Find iPhone 14 Pro Max with high seller ratings"
+### 3. Database Setup
 
-**Japanese:**
-- "1500ドル以下のゲーミングノートパソコンを探しています"
-- "状態の良いヴィンテージのチャンピオンパーカーを見せて"
-- "売り手評価の高いiPhone 14 Pro Maxを見つけて"
+Create a PostgreSQL database:
+
+```sql
+CREATE DATABASE mercari_db;
+```
+
+The app will automatically create tables and populate sample data on first run.
+
+### 4. Run the Application
+
+```bash
+# Start the Streamlit app
+streamlit run app.py --server.port 5000
+
+# Or use the specific configuration
+streamlit run app.py --server.port 5000 --server.address 0.0.0.0
+```
+
+Visit `http://localhost:5000` in your browser.
+
+### 5. Development Tips
+
+- The app uses caching for services - restart if you modify core modules
+- Check `.streamlit/config.toml` for theme and server configuration
+- Database schema is defined in `core/database.py`
+- Sample data is in `core/sample_data.py`
 
 ## Project Structure
 
+```
+├── app.py                  # Main Streamlit application
+├── core/
+│   ├── database.py         # Database models and operations
+│   ├── data_handler.py     # Data retrieval and processing
+│   ├── llm_service.py      # OpenAI integration
+│   ├── product_ranker.py   # Product ranking algorithm
+│   ├── sample_data.py      # Sample product data
+│   └── translator.py       # Translation services
+├── utils/
+│   └── helpers.py          # Utility functions
+├── .streamlit/
+│   └── config.toml         # Streamlit configuration
+└── requirements.txt        # Python dependencies
+```
+
+## Deployment Instructions
+
+### Option 1: Replit Deployment (Recommended)
+
+1. **Prepare for Deployment:**
+   - Ensure all environment variables are set in Replit Secrets
+   - Verify the app runs without errors locally
+
+2. **Deploy on Replit:**
+   - Click the "Deploy" button in your Replit workspace
+   - Choose "Autoscale Deployment" for production use
+   - The app will be available at `https://your-app-name.replit.app`
+
+### Option 2: Heroku Deployment
+
+1. **Setup Heroku:**
+   ```bash
+   # Install Heroku CLI
+   npm install -g heroku
+   
+   # Login to Heroku
+   heroku login
+   
+   # Create a new app
+   heroku create your-app-name
+   ```
+
+2. **Add PostgreSQL:**
+   ```bash
+   heroku addons:create heroku-postgresql:mini
+   ```
+
+3. **Set Environment Variables:**
+   ```bash
+   heroku config:set OPENAI_API_KEY=your_openai_api_key
+   ```
+
+4. **Create Procfile:**
+   ```
+   web: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
+   ```
+
+5. **Deploy:**
+   ```bash
+   git add .
+   git commit -m "Deploy to Heroku"
+   git push heroku main
+   ```
+
+### Option 3: Railway Deployment
+
+1. **Connect to Railway:**
+   - Visit [railway.app](https://railway.app)
+   - Connect your GitHub repository
+   - Add PostgreSQL service
+
+2. **Environment Variables:**
+   - Set `OPENAI_API_KEY` in Railway dashboard
+   - Railway will automatically set PostgreSQL variables
+
+3. **Deploy:**
+   - Railway automatically deploys on git push
+
+### Option 4: Docker Deployment
+
+1. **Create Dockerfile:**
+   ```dockerfile
+   FROM python:3.11-slim
+   
+   WORKDIR /app
+   COPY requirements.txt .
+   RUN pip install -r requirements.txt
+   
+   COPY . .
+   
+   EXPOSE 5000
+   CMD ["streamlit", "run", "app.py", "--server.port=5000", "--server.address=0.0.0.0"]
+   ```
+
+2. **Build and Run:**
+   ```bash
+   docker build -t mercari-assistant .
+   docker run -p 5000:5000 --env-file .env mercari-assistant
+   ```
+
+## Environment Variables Reference
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENAI_API_KEY` | Yes | OpenAI API key for GPT-4o |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `PGHOST` | Yes | PostgreSQL host |
+| `PGPORT` | Yes | PostgreSQL port (usually 5432) |
+| `PGUSER` | Yes | PostgreSQL username |
+| `PGPASSWORD` | Yes | PostgreSQL password |
+| `PGDATABASE` | Yes | PostgreSQL database name |
+
+## API Keys Setup
+
+### OpenAI API Key
+1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Create a new API key
+3. Add it to your environment variables
+
+### Database Access
+- For local development: Install PostgreSQL locally
+- For production: Use hosted PostgreSQL (Heroku Postgres, Railway, etc.)
+
+## Testing
+
+Test the application by:
+1. Asking product questions in English: "I want to buy a Nintendo Switch"
+2. Asking in Japanese: "新しいiPhoneが欲しいです"
+3. Browsing the product showcase tabs
+4. Checking that all text is visible in the dark theme
+
+## Troubleshooting
+
+- **API Errors:** Verify your OpenAI API key is valid and has credits
+- **Database Issues:** Check PostgreSQL connection and credentials
+- **Import Errors:** Ensure all dependencies are installed
+- **Port Issues:** Use port 5000 for Replit deployment compatibility
+
+## Support
+
+For issues or questions, check the logs in your deployment platform or run locally to debug.
