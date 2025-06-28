@@ -1,0 +1,1 @@
+# Tests package for Mercari Japan AI Shopping Agent 
