@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import streamlit as st
 import os
 import json
@@ -12,9 +14,6 @@ from collections import defaultdict
 from datetime import datetime
 from core.chat_assistant import ChatAssistant
 from core.chat_scraper import ChatScraperSync
-
-# Set OpenAI API key
-os.environ["OPENAI_API_KEY"] = "sk-1234ijkl1234ijkl1234ijkl1234ijkl1234ijkl"
 
 # Page configuration
 st.set_page_config(
