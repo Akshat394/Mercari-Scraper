@@ -8,8 +8,8 @@ import re
 from typing import Optional, List, Dict
 from datetime import datetime, timedelta
 from sqlalchemy import text
-from config import SessionLocal
-from models import Product
+from .config import SessionLocal
+from .models import Product
 
 # Configure logging
 logging.basicConfig(

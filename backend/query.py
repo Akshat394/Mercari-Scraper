@@ -1,5 +1,5 @@
-from config import SessionLocal
-from models import Product
+from .config import SessionLocal
+from .models import Product
 from sqlalchemy import func, or_, text
 
 def get_products_by_tags(tags: list, limit=10):

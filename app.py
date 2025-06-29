@@ -17,15 +17,15 @@ from core.chat_scraper import ChatScraperSync
 import sys
 import os
 
-# Add backend directory to path
-backend_path = os.path.join(os.path.dirname(__file__), 'backend')
-sys.path.insert(0, backend_path)
+# Add current directory to path so we can import backend as a package
+current_dir = os.path.dirname(__file__)
+sys.path.insert(0, current_dir)
 
-# Import backend modules directly
+# Import backend modules
 try:
-    from query import get_all_products, get_products_by_tags, search_products_by_title, get_products_by_category, get_products_by_price_range
-    from config import SessionLocal
-    from models import Product
+    from backend.query import get_all_products, get_products_by_tags, search_products_by_title, get_products_by_category, get_products_by_price_range
+    from backend.config import SessionLocal
+    from backend.models import Product
     print("✅ Backend modules imported successfully")
 except ImportError as e:
     st.error(f"Backend import error: {e}")
