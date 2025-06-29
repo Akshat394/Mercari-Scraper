@@ -1,5 +1,5 @@
-from models import Product
-from config import SessionLocal
+from .models import Product
+from .config import SessionLocal
 from sqlalchemy import or_, text
 import re
 

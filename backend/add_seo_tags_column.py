@@ -1,4 +1,4 @@
-from config import SessionLocal
+from .config import SessionLocal
 from sqlalchemy import text
 
 def add_seo_tags_column():
