@@ -15,10 +15,18 @@ from core.chat_scraper import ChatScraperSync
 
 # Backend integration
 import sys
+import os
 sys.path.append('backend')
-from backend.query import get_all_products, get_products_by_tags, search_products_by_title, get_products_by_category, get_products_by_price_range
-from backend.config import SessionLocal
-from backend.models import Product
+
+# Import backend modules directly
+try:
+    from backend.query import get_all_products, get_products_by_tags, search_products_by_title, get_products_by_category, get_products_by_price_range
+    from backend.config import SessionLocal
+    from backend.models import Product
+except ImportError as e:
+    st.error(f"Backend import error: {e}")
+    st.info("Please check that all backend files are present and properly configured.")
+    st.stop()
 
 # Install Playwright browsers at runtime if on Streamlit Cloud
 if ("CI" in os.environ or "STREAMLIT_CLOUD" in os.environ or os.environ.get("HOME", "").startswith("/home/appuser")):
