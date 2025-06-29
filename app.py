@@ -13,6 +13,13 @@ from datetime import datetime
 from core.chat_assistant import ChatAssistant
 from core.chat_scraper import ChatScraperSync
 
+# Backend integration
+import sys
+sys.path.append('backend')
+from backend.query import get_all_products, get_products_by_tags, search_products_by_title, get_products_by_category, get_products_by_price_range
+from backend.config import SessionLocal
+from backend.models import Product
+
 # Install Playwright browsers at runtime if on Streamlit Cloud
 if ("CI" in os.environ or "STREAMLIT_CLOUD" in os.environ or os.environ.get("HOME", "").startswith("/home/appuser")):
     try:
@@ -766,19 +773,59 @@ def main():
                 st.session_state.chat_messages.append({"role": "assistant", "content": "See the results above!"})
         
         with tab2:
-            # Use the same filters for browsing
-            browse_products = data_handler.get_products_by_category(filters['category'])
-            # Apply backend filtering
-            browse_products = [
-                p for p in browse_products
-                if filters['price_range']['min'] <= p.get('price', 0) <= filters['price_range']['max']
-                and (filters['condition'] == p.get('condition', '').lower() or filters['condition'] == 'all')
-                and (not filters['brand'] or _brand_matches(p.get('brand', ''), filters['brand']))
-                and p.get('seller_rating', 0) >= filters['seller_rating']
-                and (not filters['shipping_included'] or p.get('shipping_included', True))
-            ]
-            display_product_showcase(data_handler)
-            display_products(browse_products, session_id=st.session_state.session_id, db_manager=data_handler.db_manager)
+            st.markdown('<h2 class="section-title">🛍️ Browse Products</h2>', unsafe_allow_html=True)
+            
+            # Use backend data for browsing
+            try:
+                # Get products from backend database
+                if use_real_time:
+                    # Use backend query functions
+                    if filters['category'] and filters['category'] != "All":
+                        browse_products = get_products_by_category(filters['category'], limit=50)
+                    elif filters.get('price_range'):
+                        browse_products = get_products_by_price_range(
+                            filters['price_range']['min'], 
+                            filters['price_range']['max'], 
+                            limit=50
+                        )
+                    else:
+                        browse_products = get_all_products(limit=50)
+                else:
+                    # Use cached data from data handler
+                    browse_products = data_handler.get_products_by_category(filters['category'])
+                
+                # Apply additional filters
+                filtered_products = []
+                for product in browse_products:
+                    # Price filter
+                    if filters.get('price_range'):
+                        if not (filters['price_range']['min'] <= product['price'] <= filters['price_range']['max']):
+                            continue
+                    
+                    # Brand filter
+                    if filters.get('brand') and filters['brand'] != "All":
+                        if not _brand_matches(product.get('brand', ''), [filters['brand']]):
+                            continue
+                    
+                    # Condition filter
+                    if filters.get('condition') and filters['condition'] != "All":
+                        if product.get('condition', '').lower() != filters['condition'].lower():
+                            continue
+                    
+                    filtered_products.append(product)
+                
+                # Display products
+                if filtered_products:
+                    st.success(f"Found {len(filtered_products)} products!")
+                    display_products(filtered_products, st.session_state.session_id, data_handler.db_manager)
+                else:
+                    st.warning("No products found with the current filters. Try adjusting your search criteria.")
+                    
+            except Exception as e:
+                st.error(f"Error loading products: {e}")
+                st.info("Falling back to sample data...")
+                # Fallback to showcase products
+                display_product_showcase(data_handler)
     
     except Exception as e:
         st.error(f"Application error: {e}")

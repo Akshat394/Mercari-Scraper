@@ -1,34 +1,31 @@
-# Core AI and LLM dependencies
-openai>=1.93.0
-anthropic>=0.55.0
-
-# Web scraping and automation
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-selenium>=4.15.0
-webdriver-manager>=4.0.0
-lxml>=4.9.0
-fake-useragent>=1.4.0
-aiohttp>=3.9.0
-playwright>=1.53.0
-
-# Database and data handling
-psycopg2-binary>=2.9.10
-sqlalchemy>=2.0.41
+# Core dependencies
+streamlit>=1.28.0
 pandas>=2.0.0
 numpy>=1.24.0
 
-# Web framework and UI
-streamlit>=1.46.1
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
 
-# Content extraction
-trafilatura>=2.0.0
+# Web scraping
+playwright>=1.40.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# AI/ML
+openai>=1.0.0
+langchain>=0.1.0
 
 # Utilities
 python-dotenv>=1.0.0
-asyncio>=3.4.3
+pydantic>=2.0.0
+typing-extensions>=4.8.0
 
 # Development and testing
 pytest>=7.4.0
-black>=23.0.0
-flake8>=6.0.0 
+pytest-cov>=4.1.0
+
+# Optional: For enhanced features
+# pillow>=10.0.0  # Image processing
+# plotly>=5.17.0  # Interactive charts
+# altair>=5.1.0   # Data visualization 

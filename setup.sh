@@ -1,10 +1,27 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+# Mercari Japan Shopping AI - Deployment Setup Script
+
+echo "🚀 Setting up Mercari Japan Shopping AI..."
 
 # Install Python dependencies
+echo "📦 Installing Python dependencies..."
 pip install -r requirements.txt
 
 # Install Playwright browsers
-playwright install
+echo "🌐 Installing Playwright browsers..."
+playwright install chromium
+
+# Create necessary directories
+echo "📁 Creating directories..."
+mkdir -p logs
+mkdir -p temp
+
+# Set permissions
+echo "🔐 Setting permissions..."
+chmod +x setup.sh
+
+echo "✅ Setup complete! Ready to deploy."
 
 # Install Google Chrome
 if ! command -v google-chrome > /dev/null; then
