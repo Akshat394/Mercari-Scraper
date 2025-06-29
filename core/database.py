@@ -1,10 +1,13 @@
 import os
 import json
 import re
+import uuid
+from datetime import datetime
 from typing import Dict, List, Any, Optional
-from sqlalchemy import create_engine, Column, Integer, String, Float, Text, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Float, Text, Boolean, DateTime, ARRAY, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.dialects.postgresql import UUID
 from core.sample_data import SAMPLE_MERCARI_DATA
 
 Base = declarative_base()
@@ -24,8 +27,54 @@ class Product(Base):
     url = Column(String)
     description = Column(Text)
 
+class SearchHistory(Base):
+    """SQLAlchemy model for storing Mercari search results"""
+    __tablename__ = "search_history"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    query_text = Column(String, nullable=False)
+    product_title = Column(String, nullable=False)
+    price = Column(Integer, nullable=False)
+    image_url = Column(String)
+    condition = Column(String)
+    seller_rating = Column(Float)
+    tags = Column(ARRAY(String))  # PostgreSQL array for tags
+    created_at = Column(DateTime, default=datetime.utcnow)
+    session_id = Column(String)  # To group searches by user session
+    product_id = Column(String)  # Original Mercari product ID
+    category = Column(String)
+    brand = Column(String)
+    url = Column(String)
+    description = Column(Text)
+
+class UserFeedback(Base):
+    """SQLAlchemy model for user feedback on products"""
+    __tablename__ = "user_feedback"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    session_id = Column(String, nullable=False)
+    product_id = Column(String, nullable=False)  # Removed ForeignKey constraint
+    action_type = Column(String, nullable=False)  # liked, dismissed, saved, etc.
+    comment = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class CartItem(Base):
+    """SQLAlchemy model for cart items"""
+    __tablename__ = "cart_items"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    session_id = Column(String, nullable=False)
+    product_id = Column(String, nullable=False)
+    product_title = Column(String, nullable=False)
+    price = Column(Integer, nullable=False)
+    image_url = Column(String)
+    condition = Column(String)
+    category = Column(String)
+    brand = Column(String)
+    url = Column(String)
+    added_at = Column(DateTime, default=datetime.utcnow)
+
 class DatabaseManager:
-    """Manages database connections and operations for Mercari products"""
+    """Manages database connections and operations for Mercari products and search history"""
     
     def __init__(self, connection_string=None):
         # Use the provided PostgreSQL connection string or default
@@ -112,6 +161,305 @@ class DatabaseManager:
         finally:
             session.close()
     
+    def store_search_results(self, query_text: str, products: List[Dict], session_id: str = None) -> List[str]:
+        """
+        Store search results in the search history table
+        
+        Args:
+            query_text: The user's search query
+            products: List of product dictionaries
+            session_id: Optional session ID to group searches
+            
+        Returns:
+            List of stored search history IDs
+        """
+        session = self.get_session()
+        stored_ids = []
+        
+        try:
+            for product in products:
+                # Extract tags from product data
+                tags = self._extract_tags_from_product(product)
+                
+                # Create search history entry
+                search_entry = SearchHistory(
+                    query_text=self._sanitize_text(query_text),
+                    product_title=self._sanitize_text(product.get('name', '')),
+                    price=product.get('price', 0),
+                    image_url=self._sanitize_text(product.get('image_url', '')),
+                    condition=self._sanitize_text(product.get('condition', '')),
+                    seller_rating=product.get('seller_rating', 0.0),
+                    tags=tags,
+                    session_id=session_id,
+                    product_id=self._sanitize_text(product.get('id', '')),
+                    category=self._sanitize_text(product.get('category', '')),
+                    brand=self._sanitize_text(product.get('brand', '')),
+                    url=self._sanitize_text(product.get('url', '')),
+                    description=self._sanitize_text(product.get('description', ''))
+                )
+                
+                session.add(search_entry)
+                stored_ids.append(str(search_entry.id))
+            
+            session.commit()
+            print(f"Stored {len(products)} search results for query: {query_text}")
+            return stored_ids
+            
+        except Exception as e:
+            session.rollback()
+            print(f"Error storing search results: {e}")
+            return []
+        finally:
+            session.close()
+    
+    def _extract_tags_from_product(self, product: Dict) -> List[str]:
+        """Extract tags from product data for better searchability using TagProcessor"""
+        try:
+            from core.tag_processor import TagProcessor
+            tag_processor = TagProcessor()
+            
+            # Use the enhanced tag processor
+            tags = tag_processor.process_product_tags(product)
+            return tags
+            
+        except ImportError:
+            # Fallback to original logic if TagProcessor is not available
+            return self._extract_tags_fallback(product)
+    
+    def _extract_tags_fallback(self, product: Dict) -> List[str]:
+        """Fallback tag extraction logic"""
+        tags = []
+        
+        # Add category as tag
+        if product.get('category'):
+            tags.append(product['category'].lower())
+        
+        # Add brand as tag (avoid generic affordable terms)
+        if product.get('brand'):
+            brand = product['brand'].lower()
+            # Skip generic affordable terms
+            generic_terms = ['brand affordable', 'affordable brand', 'cheap brand', 'budget brand']
+            if not any(term in brand for term in generic_terms):
+                tags.append(brand)
+        
+        # Add condition as tag
+        if product.get('condition'):
+            tags.append(product['condition'].lower())
+        
+        # Extract keywords from name
+        if product.get('name'):
+            name_words = product['name'].lower().split()
+            # Add common product keywords
+            keywords = ['iphone', 'macbook', 'nintendo', 'switch', 'playstation', 'xbox', 'airpods', 'ipad']
+            for keyword in keywords:
+                if keyword in name_words:
+                    tags.append(keyword)
+        
+        # Add pricing tags based on price
+        price = product.get('price', 0)
+        if price <= 2000:
+            tags.append('very affordable')
+        elif price <= 5000:
+            tags.append('affordable')
+        elif price <= 15000:
+            tags.append('mid range')
+        else:
+            tags.append('premium')
+        
+        # Remove duplicates and return
+        return list(set(tags))
+    
+    def get_search_history(self, session_id: str = None, limit: int = 50) -> List[Dict]:
+        """
+        Get search history, optionally filtered by session
+        
+        Args:
+            session_id: Optional session ID to filter results
+            limit: Maximum number of results to return
+            
+        Returns:
+            List of search history entries as dictionaries
+        """
+        session = self.get_session()
+        try:
+            query = session.query(SearchHistory)
+            
+            if session_id:
+                query = query.filter(SearchHistory.session_id == session_id)
+            
+            # Order by most recent first
+            query = query.order_by(SearchHistory.created_at.desc()).limit(limit)
+            
+            results = query.all()
+            return [self._search_history_to_dict(result) for result in results]
+            
+        except Exception as e:
+            print(f"Error getting search history: {e}")
+            return []
+        finally:
+            session.close()
+    
+    def get_search_history_by_query(self, query_text: str, limit: int = 20) -> List[Dict]:
+        """
+        Get search history for a specific query
+        
+        Args:
+            query_text: The search query to look for
+            limit: Maximum number of results to return
+            
+        Returns:
+            List of search history entries as dictionaries
+        """
+        session = self.get_session()
+        try:
+            # Use ILIKE for case-insensitive search
+            results = session.query(SearchHistory).filter(
+                SearchHistory.query_text.ilike(f"%{query_text}%")
+            ).order_by(SearchHistory.created_at.desc()).limit(limit).all()
+            
+            return [self._search_history_to_dict(result) for result in results]
+            
+        except Exception as e:
+            print(f"Error getting search history by query: {e}")
+            return []
+        finally:
+            session.close()
+    
+    def get_recent_products_for_query(self, query_text: str, limit: int = 10) -> List[Dict]:
+        """
+        Get recent products for a query (for recommendations)
+        
+        Args:
+            query_text: The search query
+            limit: Maximum number of products to return
+            
+        Returns:
+            List of product dictionaries
+        """
+        session = self.get_session()
+        try:
+            # Get recent search results for this query
+            results = session.query(SearchHistory).filter(
+                SearchHistory.query_text.ilike(f"%{query_text}%")
+            ).order_by(SearchHistory.created_at.desc()).limit(limit).all()
+            
+            # Convert to product format
+            products = []
+            for result in results:
+                product = {
+                    "id": result.product_id or str(result.id),
+                    "name": result.product_title,
+                    "price": result.price,
+                    "condition": result.condition,
+                    "seller_rating": result.seller_rating,
+                    "category": result.category,
+                    "brand": result.brand,
+                    "image_url": result.image_url,
+                    "url": result.url,
+                    "description": result.description,
+                    "tags": result.tags or []
+                }
+                products.append(product)
+            
+            return products
+            
+        except Exception as e:
+            print(f"Error getting recent products for query: {e}")
+            return []
+        finally:
+            session.close()
+    
+    def _search_history_to_dict(self, search_entry: SearchHistory) -> Dict:
+        """Convert SearchHistory object to dictionary"""
+        return {
+            "id": str(search_entry.id),
+            "query_text": search_entry.query_text,
+            "product_title": search_entry.product_title,
+            "price": search_entry.price,
+            "image_url": search_entry.image_url,
+            "condition": search_entry.condition,
+            "seller_rating": search_entry.seller_rating,
+            "tags": search_entry.tags or [],
+            "created_at": search_entry.created_at.isoformat() if search_entry.created_at else None,
+            "session_id": search_entry.session_id,
+            "product_id": search_entry.product_id,
+            "category": search_entry.category,
+            "brand": search_entry.brand,
+            "url": search_entry.url,
+            "description": search_entry.description
+        }
+    
+    def get_search_summary(self, session_id: str = None) -> Dict:
+        """
+        Get a summary of search history for the sidebar
+        
+        Returns:
+            Dictionary with search summary statistics
+        """
+        session = self.get_session()
+        try:
+            query = session.query(SearchHistory)
+            
+            if session_id:
+                query = query.filter(SearchHistory.session_id == session_id)
+            
+            # Get unique queries
+            unique_queries = session.query(SearchHistory.query_text).distinct().count()
+            
+            # Get total searches
+            total_searches = query.count()
+            
+            # Get recent searches (last 24 hours)
+            from datetime import timedelta
+            yesterday = datetime.utcnow() - timedelta(days=1)
+            recent_searches = query.filter(SearchHistory.created_at >= yesterday).count()
+            
+            # Get most common queries
+            from sqlalchemy import func
+            common_queries = session.query(
+                SearchHistory.query_text,
+                func.count(SearchHistory.id).label('count')
+            ).group_by(SearchHistory.query_text).order_by(
+                func.count(SearchHistory.id).desc()
+            ).limit(5).all()
+            
+            return {
+                "total_searches": total_searches,
+                "unique_queries": unique_queries,
+                "recent_searches": recent_searches,
+                "common_queries": [{"query": q.query_text, "count": q.count} for q in common_queries]
+            }
+            
+        except Exception as e:
+            print(f"Error getting search summary: {e}")
+            return {
+                "total_searches": 0,
+                "unique_queries": 0,
+                "recent_searches": 0,
+                "common_queries": []
+            }
+        finally:
+            session.close()
+    
+    def clear_search_history(self, session_id: str = None):
+        """Clear search history, optionally for a specific session"""
+        session = self.get_session()
+        try:
+            query = session.query(SearchHistory)
+            
+            if session_id:
+                query = query.filter(SearchHistory.session_id == session_id)
+            
+            deleted_count = query.delete()
+            session.commit()
+            print(f"Deleted {deleted_count} search history entries")
+            
+        except Exception as e:
+            session.rollback()
+            print(f"Error clearing search history: {e}")
+        finally:
+            session.close()
+
     def search_products(self, query: str, filters: Dict[str, Any]) -> List[Dict]:
         """
         Search for products in the database based on query and filters
@@ -150,7 +498,17 @@ class DatabaseManager:
             
             # Apply brand filter
             if filters.get('brand'):
-                db_query = db_query.filter(Product.brand.ilike(f"%{filters['brand']}%"))
+                brand = filters['brand']
+                # Handle brand as either string or list
+                if isinstance(brand, list):
+                    # If it's a list, use OR condition for any matching brand
+                    from sqlalchemy import or_
+                    brand_conditions = [Product.brand.ilike(f"%{b}%") for b in brand if b]
+                    if brand_conditions:
+                        db_query = db_query.filter(or_(*brand_conditions))
+                else:
+                    # If it's a string, use simple LIKE
+                    db_query = db_query.filter(Product.brand.ilike(f"%{brand}%"))
             
             # Apply category filter
             if filters.get('category'):
@@ -277,7 +635,14 @@ class DatabaseManager:
                     terms.append(self._sanitize_text(kw).lower())
         
         if filters.get('brand'):
-            terms.append(self._sanitize_text(filters['brand']).lower())
+            brand = filters['brand']
+            # Handle brand as either string or list
+            if isinstance(brand, list):
+                for b in brand:
+                    if b:
+                        terms.append(self._sanitize_text(b).lower())
+            else:
+                terms.append(self._sanitize_text(brand).lower())
         
         if filters.get('category'):
             terms.append(self._sanitize_text(filters['category']).lower())
@@ -431,5 +796,220 @@ class DatabaseManager:
         except Exception as e:
             session.rollback()
             print(f"Error updating product images: {e}")
+        finally:
+            session.close()
+    
+    def close(self):
+        """Close database connections and clean up resources"""
+        try:
+            if hasattr(self, 'engine'):
+                self.engine.dispose()
+                print("Database connections closed")
+        except Exception as e:
+            print(f"Error closing database connections: {e}")
+
+    def save_user_feedback(self, session_id: str, product_id: str, action_type: str, comment: str = None) -> bool:
+        """Save user feedback (like, save, dismiss, etc.) for a product"""
+        session = self.get_session()
+        try:
+            feedback = UserFeedback(
+                session_id=session_id,
+                product_id=product_id,
+                action_type=action_type,
+                comment=comment
+            )
+            session.add(feedback)
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            print(f"Error saving user feedback: {e}")
+            return False
+        finally:
+            session.close()
+
+    def get_user_feedback(self, session_id: str, action_type: str = None) -> List[Dict]:
+        """Fetch feedback for a session, optionally filtered by action_type"""
+        session = self.get_session()
+        try:
+            query = session.query(UserFeedback).filter(UserFeedback.session_id == session_id)
+            if action_type:
+                query = query.filter(UserFeedback.action_type == action_type)
+            feedbacks = query.order_by(UserFeedback.created_at.desc()).all()
+            return [
+                {
+                    "id": str(f.id),
+                    "session_id": f.session_id,
+                    "product_id": f.product_id,
+                    "action_type": f.action_type,
+                    "comment": f.comment,
+                    "created_at": f.created_at.isoformat() if f.created_at else None
+                }
+                for f in feedbacks
+            ]
+        except Exception as e:
+            print(f"Error fetching user feedback: {e}")
+            return []
+        finally:
+            session.close()
+
+    def is_product_feedback(self, session_id: str, product_id: str, action_type: str) -> bool:
+        """Check if a product has a given feedback (like, save, dismiss) for this session"""
+        session = self.get_session()
+        try:
+            exists = session.query(UserFeedback).filter(
+                UserFeedback.session_id == session_id,
+                UserFeedback.product_id == product_id,
+                UserFeedback.action_type == action_type
+            ).first()
+            return exists is not None
+        except Exception as e:
+            print(f"Error checking product feedback: {e}")
+            return False
+        finally:
+            session.close()
+
+    def get_feedback_product_ids(self, session_id: str, action_type: str) -> List[str]:
+        """Get product_ids for a given feedback type (e.g., liked, saved) for this session"""
+        session = self.get_session()
+        try:
+            results = session.query(UserFeedback.product_id).filter(
+                UserFeedback.session_id == session_id,
+                UserFeedback.action_type == action_type
+            ).all()
+            return [r[0] for r in results]
+        except Exception as e:
+            print(f"Error fetching feedback product ids: {e}")
+            return []
+        finally:
+            session.close()
+
+    # Cart Management Functions
+    def add_to_cart(self, product: Dict, session_id: str) -> str:
+        """Add a product to the cart for a session"""
+        session = self.get_session()
+        try:
+            # Check if product is already in cart
+            existing = session.query(CartItem).filter(
+                CartItem.session_id == session_id,
+                CartItem.product_id == product.get('id', '')
+            ).first()
+            
+            if existing:
+                return "Already in cart"
+            
+            # Add new cart item
+            cart_item = CartItem(
+                session_id=session_id,
+                product_id=self._sanitize_text(product.get('id', '')),
+                product_title=self._sanitize_text(product.get('name', '')),
+                price=product.get('price', 0),
+                image_url=self._sanitize_text(product.get('image_url', '')),
+                condition=self._sanitize_text(product.get('condition', '')),
+                category=self._sanitize_text(product.get('category', '')),
+                brand=self._sanitize_text(product.get('brand', '')),
+                url=self._sanitize_text(product.get('url', ''))
+            )
+            
+            session.add(cart_item)
+            session.commit()
+            return "Added to cart"
+            
+        except Exception as e:
+            session.rollback()
+            print(f"Error adding to cart: {e}")
+            return "Error adding to cart"
+        finally:
+            session.close()
+
+    def get_cart_items(self, session_id: str) -> List[Dict]:
+        """Get all cart items for a session"""
+        session = self.get_session()
+        try:
+            cart_items = session.query(CartItem).filter(
+                CartItem.session_id == session_id
+            ).order_by(CartItem.added_at.desc()).all()
+            
+            return [
+                {
+                    "id": str(item.id),
+                    "session_id": item.session_id,
+                    "product_id": item.product_id,
+                    "product_title": item.product_title,
+                    "price": item.price,
+                    "image_url": item.image_url,
+                    "condition": item.condition,
+                    "category": item.category,
+                    "brand": item.brand,
+                    "url": item.url,
+                    "added_at": item.added_at.isoformat() if item.added_at else None
+                }
+                for item in cart_items
+            ]
+        except Exception as e:
+            print(f"Error fetching cart items: {e}")
+            return []
+        finally:
+            session.close()
+
+    def remove_from_cart(self, product_id: str, session_id: str) -> bool:
+        """Remove a product from the cart"""
+        session = self.get_session()
+        try:
+            result = session.query(CartItem).filter(
+                CartItem.session_id == session_id,
+                CartItem.product_id == product_id
+            ).delete()
+            session.commit()
+            return result > 0
+        except Exception as e:
+            session.rollback()
+            print(f"Error removing from cart: {e}")
+            return False
+        finally:
+            session.close()
+
+    def is_in_cart(self, product_id: str, session_id: str) -> bool:
+        """Check if a product is in the cart for a session"""
+        session = self.get_session()
+        try:
+            exists = session.query(CartItem).filter(
+                CartItem.session_id == session_id,
+                CartItem.product_id == product_id
+            ).first()
+            return exists is not None
+        except Exception as e:
+            print(f"Error checking cart status: {e}")
+            return False
+        finally:
+            session.close()
+
+    def clear_cart(self, session_id: str) -> bool:
+        """Clear all items from cart for a session"""
+        session = self.get_session()
+        try:
+            result = session.query(CartItem).filter(
+                CartItem.session_id == session_id
+            ).delete()
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            print(f"Error clearing cart: {e}")
+            return False
+        finally:
+            session.close()
+
+    def get_cart_total(self, session_id: str) -> int:
+        """Get the total price of all items in cart"""
+        session = self.get_session()
+        try:
+            total = session.query(CartItem.price).filter(
+                CartItem.session_id == session_id
+            ).all()
+            return sum(price[0] for price in total)
+        except Exception as e:
+            print(f"Error calculating cart total: {e}")
+            return 0
         finally:
             session.close()

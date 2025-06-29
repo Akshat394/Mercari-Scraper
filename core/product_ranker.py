@@ -96,8 +96,20 @@ class ProductRanker:
         
         # Strong bonus for exact brand match
         if query_filters.get('brand') and product.get('brand'):
-            if query_filters['brand'].lower() == product['brand'].lower():
-                score += 0.5
+            brand_filter = query_filters['brand']
+            product_brand = product['brand'].lower()
+            
+            # Handle brand as either string or list
+            if isinstance(brand_filter, list):
+                # Check if any brand in the list matches
+                for brand in brand_filter:
+                    if brand and brand.lower() == product_brand:
+                        score += 0.5
+                        break
+            else:
+                # Handle as string
+                if brand_filter.lower() == product_brand:
+                    score += 0.5
         
         # Strong bonus for category match
         if query_filters.get('category') and product.get('category'):

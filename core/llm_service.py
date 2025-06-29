@@ -2,6 +2,7 @@ import json
 import os
 from typing import Dict, List, Any
 from openai import OpenAI
+from core.tag_processor import TagProcessor
 
 class LLMService:
     """Service for LLM operations including query parsing and recommendation generation"""
@@ -15,6 +16,7 @@ class LLMService:
             self.client = OpenAI(api_key=self.api_key)
         else:
             self.client = None
+        self.tag_processor = TagProcessor()
     
     def parse_query(self, query: str, language: str) -> Dict[str, Any]:
         """
@@ -101,6 +103,7 @@ class LLMService:
     def generate_recommendations(self, original_query: str, products: List[Dict], language: str) -> str:
         """
         Generate recommendation text for the top products using LLM
+        Post-process to remove/replace generic 'brand affordable' tags
         """
         if self.mock_mode:
             if not products:
@@ -150,10 +153,10 @@ Please provide recommendations explaining why these products match the user's ne
                 temperature=0.7,
                 max_tokens=1000
             )
-            
             content = response.choices[0].message.content
+            # Post-process LLM output to clean up tags/phrasing
+            content = self.tag_processor.process_llm_recommendations(content)
             return content if content else f"Here are the top {len(products)} products I found for you. Please check the details below."
-            
         except Exception as e:
             return f"Here are the top {len(products)} products I found for you. Please check the details below."
     
