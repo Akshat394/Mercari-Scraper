@@ -13,6 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from fake_useragent import UserAgent
 import re
 import logging
+import os
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +23,9 @@ class MercariScraper:
     """Enhanced Mercari Japan scraper that extracts real product images"""
     
     def __init__(self, use_selenium: bool = True):
+        # Disable Selenium on Streamlit Cloud
+        if ("CI" in os.environ or "STREAMLIT_CLOUD" in os.environ or os.environ.get("HOME", "").startswith("/home/appuser")):
+            use_selenium = False
         self.session = requests.Session()
         self.base_url = "https://jp.mercari.com"
         self.use_selenium = use_selenium

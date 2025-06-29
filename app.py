@@ -13,6 +13,14 @@ from datetime import datetime
 from core.chat_assistant import ChatAssistant
 from core.chat_scraper import ChatScraperSync
 
+# Install Playwright browsers at runtime if on Streamlit Cloud
+if ("CI" in os.environ or "STREAMLIT_CLOUD" in os.environ or os.environ.get("HOME", "").startswith("/home/appuser")):
+    try:
+        import subprocess
+        subprocess.run(["playwright", "install", "chromium"], check=True)
+    except Exception as e:
+        print("Playwright install failed:", e)
+
 # Page configuration
 st.set_page_config(
     page_title="Mercari Japan Shopping Assistant",
@@ -330,20 +338,17 @@ def display_cart_sidebar(session_id, db_manager):
 def display_product_card(product: Dict, index: Optional[int] = None, session_id: str = None, db_manager=None):
     """Display a single product card with enhanced styling"""
     col1, col2 = st.columns([1, 3])
-    
     with col1:
         if product.get('image_url'):
             st.image(product['image_url'], use_container_width=True, caption="Product Image")
         else:
             st.image("https://via.placeholder.com/200x200?text=No+Image", use_container_width=True, caption="No Image Available")
-        
         # Cart button
         if session_id and db_manager:
             is_in_cart = db_manager.is_in_cart(product['id'], session_id)
-            
             if is_in_cart:
                 if st.button("✅ Added to Cart", key=f"cart_{product['id']}", disabled=True):
-                    pass  # Button is disabled when already in cart
+                    pass
             else:
                 if st.button("🛒 Add to Cart", key=f"cart_{product['id']}"):
                     result = db_manager.add_to_cart(product, session_id)
@@ -352,21 +357,19 @@ def display_product_card(product: Dict, index: Optional[int] = None, session_id:
                     else:
                         st.info(result)
                     st.rerun()
-        
         # Feedback buttons
         if session_id and db_manager:
             feedback_button(product['id'], session_id, db_manager, 'liked', '❤️', 'Like this product')
             feedback_button(product['id'], session_id, db_manager, 'saved', '⭐', 'Save this product')
             feedback_button(product['id'], session_id, db_manager, 'dismissed', '🚫', 'Dismiss this product')
-    
     with col2:
         st.markdown(f"""
         <div class="product-card">
-            <h3>{product['name']}</h3>
-            <div class="price-tag">¥{product['price']:,}</div>
+            <h3>{product.get('name', 'Unknown')}</h3>
+            <div class="price-tag">¥{product.get('price', 0):,}</div>
             <div class="category-badge">{product.get('category', 'Unknown')}</div>
-            <p><strong>Condition:</strong> {product['condition']}</p>
-            <p><strong>Seller Rating:</strong> <span class="star-rating">{'⭐' * int(product['seller_rating'])}</span> ({product['seller_rating']}/5)</p>
+            <p><strong>Condition:</strong> {product.get('condition', 'Unknown')}</p>
+            <p><strong>Seller Rating:</strong> <span class="star-rating">{'⭐' * int(product.get('seller_rating', 0))}</span> ({product.get('seller_rating', 'N/A')}/5)</p>
             {f'<p><strong>Brand:</strong> {product["brand"]}</p>' if product.get('brand') else ''}
             {f'<p><strong>Description:</strong> {product["description"]}</p>' if product.get('description') else ''}
         </div>
@@ -433,21 +436,17 @@ def display_showcase_grid(products: List[Dict], session_id: str = None, db_manag
             _display_product_card_compact(product, session_id=session_id, db_manager=db_manager)
 
 def _display_product_card_compact(product: Dict, session_id: str = None, db_manager=None):
-    """Display a compact product card for grid layout"""
     st.markdown(f"""
     <div class="product-card" style="margin: 0.5rem 0;">
-        <h4>{product['name'][:50]}{'...' if len(product['name']) > 50 else ''}</h4>
-        <div class="price-tag">¥{product['price']:,}</div>
+        <h4>{product.get('name', 'Unknown')[:50]}{'...' if len(product.get('name', 'Unknown')) > 50 else ''}</h4>
+        <div class="price-tag">¥{product.get('price', 0):,}</div>
         <div class="category-badge">{product.get('category', 'Unknown')}</div>
-        <p><strong>Condition:</strong> {product['condition']}</p>
-        <p><strong>Rating:</strong> <span class="star-rating">{'⭐' * int(product['seller_rating'])}</span></p>
+        <p><strong>Condition:</strong> {product.get('condition', 'Unknown')}</p>
+        <p><strong>Rating:</strong> <span class="star-rating">{'⭐' * int(product.get('seller_rating', 0))}</span></p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Add cart button for compact cards
     if session_id and db_manager:
         is_in_cart = db_manager.is_in_cart(product['id'], session_id)
-        
         if is_in_cart:
             st.button("✅ Added", key=f"compact_cart_{product['id']}", disabled=True)
         else:
