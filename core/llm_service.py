@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from typing import Dict, List, Any
 from openai import OpenAI
 from core.tag_processor import TagProcessor
@@ -7,6 +8,14 @@ import streamlit as st
 
 class LLMService:
     """Service for LLM operations including query parsing and recommendation generation"""
+    
+    # Simple in-memory rate limiter and cache
+    _last_request_time = 0
+    _cache = {}
+    _cache_ttl = 60  # seconds
+    _error_cache_ttl = 30  # seconds for error responses
+    # Make rate limit interval configurable via env var (default 20s for low RPM)
+    _min_interval = float(os.environ.get("OPENAI_RATE_LIMIT_INTERVAL", 20))
     
     def __init__(self, api_key=None, mock_mode=False):
         # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
@@ -20,14 +29,40 @@ class LLMService:
             self.client = None
         self.tag_processor = TagProcessor()
     
+    def _rate_limit(self):
+        now = time.time()
+        elapsed = now - self._last_request_time
+        if elapsed < self._min_interval:
+            time.sleep(self._min_interval - elapsed)
+        self._last_request_time = time.time()
+    
+    def _get_cache(self, key):
+        entry = self._cache.get(key)
+        if entry:
+            value, timestamp, is_error = entry
+            ttl = self._error_cache_ttl if is_error else self._cache_ttl
+            if time.time() - timestamp < ttl:
+                return value
+            else:
+                del self._cache[key]
+        return None
+    
+    def _set_cache(self, key, value, is_error=False):
+        self._cache[key] = (value, time.time(), is_error)
+    
     def parse_query(self, query: str, language: str) -> Dict[str, Any]:
         """
         Parse user query to extract product filters and search parameters
         Uses function calling to structure the output
         """
+        cache_key = f"parse_query:{query}:{language}"
+        cached = self._get_cache(cache_key)
+        if cached:
+            return cached
+        self._rate_limit()
+        result = None
         if self.mock_mode:
-            # Return a mock parse result for tests
-            return {
+            result = {
                 "product_keywords": ["iphone"],
                 "category": "Electronics",
                 "price_range": {"min": 100000, "max": 200000},
@@ -37,70 +72,82 @@ class LLMService:
                 "size": None,
                 "features": []
             }
-        system_prompt = """You are a product search query parser for Mercari Japan. 
-        Extract relevant information from user queries about products they want to buy.
-        
-        Extract the following information:
-        - product_keywords: List of main product terms
-        - category: Product category if identifiable
-        - price_range: Dict with min/max if mentioned
-        - condition: Preferred condition (new, like_new, good, acceptable)
-        - brand: Brand name if mentioned
-        - color: Color preference if mentioned
-        - size: Size if mentioned
-        - features: Any specific features mentioned
-        
-        Respond with JSON format."""
-        
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Parse this query: {query}"}
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.1
-            )
+        else:
+            system_prompt = """You are a product search query parser for Mercari Japan. 
+            Extract relevant information from user queries about products they want to buy.
             
-            # Handle response format properly
-            content = response.choices[0].message.content
-            if isinstance(content, str):
-                result = json.loads(content)
-            else:
-                result = content
+            Extract the following information:
+            - product_keywords: List of main product terms
+            - category: Product category if identifiable
+            - price_range: Dict with min/max if mentioned
+            - condition: Preferred condition (new, like_new, good, acceptable)
+            - brand: Brand name if mentioned
+            - color: Color preference if mentioned
+            - size: Size if mentioned
+            - features: Any specific features mentioned
             
-            # Ensure all required fields are present
-            default_result = {
-                "product_keywords": [],
-                "category": None,
-                "price_range": {"min": None, "max": None},
-                "condition": None,
-                "brand": None,
-                "color": None,
-                "size": None,
-                "features": []
-            }
-            
-            # Merge with defaults
-            for key, value in default_result.items():
-                if key not in result:
-                    result[key] = value
-            
-            return result
-            
-        except Exception as e:
-            # Fallback parsing
-            return {
-                "product_keywords": [query.lower()],
-                "category": None,
-                "price_range": {"min": None, "max": None},
-                "condition": None,
-                "brand": None,
-                "color": None,
-                "size": None,
-                "features": []
-            }
+            Respond with JSON format."""
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": f"Parse this query: {query}"}
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.1
+                )
+                content = response.choices[0].message.content
+                if isinstance(content, str):
+                    result = json.loads(content)
+                else:
+                    result = content
+                default_result = {
+                    "product_keywords": [],
+                    "category": None,
+                    "price_range": {"min": None, "max": None},
+                    "condition": None,
+                    "brand": None,
+                    "color": None,
+                    "size": None,
+                    "features": []
+                }
+                for key, value in default_result.items():
+                    if key not in result:
+                        result[key] = value
+                self._set_cache(cache_key, result)
+                return result
+            except Exception as e:
+                # Handle 429 Too Many Requests
+                if hasattr(e, 'status_code') and e.status_code == 429 or '429' in str(e):
+                    result = {
+                        "error": "Too many requests to OpenAI API. Please wait a moment and try again.",
+                        "product_keywords": [],
+                        "category": None,
+                        "price_range": {"min": None, "max": None},
+                        "condition": None,
+                        "brand": None,
+                        "color": None,
+                        "size": None,
+                        "features": []
+                    }
+                    self._set_cache(cache_key, result, is_error=True)
+                    return result
+                # Fallback parsing for other errors
+                result = {
+                    "product_keywords": [query.lower()],
+                    "category": None,
+                    "price_range": {"min": None, "max": None},
+                    "condition": None,
+                    "brand": None,
+                    "color": None,
+                    "size": None,
+                    "features": []
+                }
+                self._set_cache(cache_key, result, is_error=True)
+                return result
+        self._set_cache(cache_key, result)
+        return result
     
     def generate_recommendations(self, original_query: str, products: List[Dict], language: str) -> str:
         """
