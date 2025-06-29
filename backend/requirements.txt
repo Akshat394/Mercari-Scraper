@@ -1,5 +1,0 @@
-playwright==1.42.0
-sqlalchemy>=1.4
-psycopg2-binary
-asyncio
-uuid 
