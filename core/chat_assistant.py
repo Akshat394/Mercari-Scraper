@@ -2,14 +2,15 @@ import json
 import os
 from typing import Dict, List, Any, Optional
 from openai import OpenAI
+import streamlit as st
 
 class ChatAssistant:
     """Advanced Chat Assistant that uses LLM function calling for natural language query processing"""
     
     def __init__(self, api_key=None, mock_mode=False):
         self.model = "gpt-4o"
-        self.mock_mode = mock_mode or (os.environ.get("LLM_MOCK_MODE") == "1")
-        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
+        self.mock_mode = mock_mode or (st.secrets.get("LLM_MOCK_MODE", os.environ.get("LLM_MOCK_MODE")) == "1")
+        self.api_key = api_key or st.secrets.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY"))
         if not self.mock_mode:
             self.client = OpenAI(api_key=self.api_key)
         else:
