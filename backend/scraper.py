@@ -1,14 +1,16 @@
 import asyncio
+import time
+import random
 import uuid
 from datetime import datetime
 from typing import List, Dict, Optional
 from playwright.async_api import async_playwright, Page, Browser
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
-from .models import Product, Base
-from .config import engine, SessionLocal, SCRAPER_CONFIG, MERCARI_BASE_URL, MERCARI_SEARCH_URL
-from .utils import (
+from config import engine, SessionLocal, SCRAPER_CONFIG, MERCARI_BASE_URL, MERCARI_SEARCH_URL
+from models import Product, Base
+from utils import (
     retry_on_exception, get_random_user_agent, async_random_delay,
     sanitize_text, extract_price_from_text, extract_condition_from_text,
     extract_category_from_url, logger

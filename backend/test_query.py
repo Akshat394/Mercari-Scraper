@@ -1,4 +1,6 @@
-from query import *
+from query import get_all_products, get_products_by_tags, search_products_by_title, get_products_by_category, get_products_by_price_range
+from config import SessionLocal
+from models import Product
 
 def test_queries():
     print("🔍 Testing Query Functions with Scraped Data...")

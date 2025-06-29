@@ -1,5 +1,7 @@
-from .models import Product
-from .config import SessionLocal
+import os
+import openai
+from config import SessionLocal
+from models import Product
 from sqlalchemy import or_, text
 import re
 

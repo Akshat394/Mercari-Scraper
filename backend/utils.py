@@ -4,6 +4,12 @@ import logging
 from typing import Any, Callable
 from functools import wraps
 import time
+import re
+from typing import Optional, List, Dict
+from datetime import datetime, timedelta
+from sqlalchemy import text
+from config import SessionLocal
+from models import Product
 
 # Configure logging
 logging.basicConfig(
@@ -88,7 +94,6 @@ def sanitize_text(text: str) -> str:
     if not text:
         return ""
     
-    import re
     # Remove null bytes and other control characters
     text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', str(text))
     # Remove extra whitespace
@@ -101,7 +106,6 @@ def extract_price_from_text(price_text: str) -> float:
     if not price_text:
         return 0.0
     
-    import re
     # Remove currency symbols and commas, extract numbers
     price_match = re.search(r'[\d,]+', price_text.replace('¥', '').replace('$', ''))
     if price_match:
@@ -141,7 +145,6 @@ def extract_category_from_url(url: str) -> str:
     if not url:
         return "unknown"
     
-    import re
     # Look for category patterns in URL
     category_patterns = [
         r'/category/([^/]+)',
